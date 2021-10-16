@@ -96,6 +96,7 @@ Router.put("/update/:isbn", async (req, res) => {
   );
 
  
+
   return res.json({ books: updatedBook });
 });
 
@@ -122,6 +123,7 @@ Router.put("/author/update/:isbn", async (req, res) => {
     }
   );
 
+  
   // update the author database
 
   const updatedAuthor = await AuthorModel.findOneAndUpdate(
@@ -135,6 +137,9 @@ Router.put("/author/update/:isbn", async (req, res) => {
     },
     { new: true }
   );
+
+  
+
   return res.json({
     books: updatedBook,
     authors: updatedAuthor,
@@ -153,6 +158,8 @@ Router.delete("/delete/:isbn", async (req, res) => {
   const updatedBookDatabase = await BookModel.findOneAndDelete({
     ISBN: req.params.isbn,
   });
+
+  
   return res.json({ books: updatedBookDatabase });
 });
 
@@ -177,6 +184,9 @@ Router.delete("/delete/author/:isbn/:authorId", async (req, res) => {
     },
     { new: true }
   );
+
+  
+
   // update the author database
   const updatedAuthor = await AuthorModel.findOneAndUpdate(
     {
@@ -189,7 +199,7 @@ Router.delete("/delete/author/:isbn/:authorId", async (req, res) => {
     },
     { new: true }
   );
-
+  
   return res.json({
     message: "author was deleted!!!!!!😪",
     book: updatedBook,
