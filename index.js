@@ -7,8 +7,8 @@ const mongoose = require("mongoose");
 const database = require("./database");
 
 // Models
-const BookModels = require("./database/book");
-const AuthorModels = require("./database/author");
+const BookModel = require("./database/book");
+const AuthorModel = require("./database/author");
 const publicationsModel = require("./database/publication");
 
 // Initialization
@@ -40,9 +40,10 @@ parameter        NONE
 Methods          GET
 */
 
-booky.get("/", (req, res) => {
-    
- return res.json({ books: database.books });
+booky.get("/", async (req, res) => {
+  const getAllbooks =  await BookModel.find();
+  console.log(getAllbooks);
+  return res.json({ getAllbooks });
 });
 
 /*
@@ -53,16 +54,16 @@ parameter        isbn
 Methods          GET
 */
 
-booky.get("/is/:isbn", (req, res) => {
-    const getspecificBook = database.books.filter(
-        (book) => book.ISBN === req.params.isbn);
+booky.get("/is/:isbn", async (req, res) => {
 
-        if (getspecificBook.length === 0) {
-            return res.json({
-                 error: `No book found for the ISBN of ${req.params.isbn}`,});
-        }
+  const getspecificBook = await BookModel.findOne({ISBN: req.params.isbn});
+    if (!getspecificBook) {
+     return res.json({
+     error: `No book found for the ISBN of ${req.params.isbn}`,
+    });
+  }
 
-        return res.json({ book: getspecificBook });
+      return res.json({ book: getspecificBook });
 });
 
 
@@ -73,14 +74,19 @@ Access           PUBLIC
 parameter        category
 Methods          GET
 */
-booky.get("/c/:category", (req, res) => {
-    const getspecificBook = database.books.filter((book) => 
-     book.category.includes(req.params.category)
-    );
+booky.get("/c/:category", async (req, res) => {
+  const getspecificBook = await BookModel.findOne({
+    category: req.params.category,
+  });
 
-    if (getspecificBook.length === 0) {
-        return res.json({
-             error: `No book found for the category of ${req.params.category}`,});
+    //  const getspecificBook = database.books.filter((book) => 
+    //  book.category.includes(req.params.category)
+    // );
+
+    if (! getspecificBook) {
+      return res.json({
+        error: `No book found for the category of ${req.params.category}`,
+      });
     }
 
     return res.json({ book: getspecificBook });
@@ -94,7 +100,7 @@ parameter        NONE
 Methods          GET
 */
 booky.get("/author", (req, res) => {
-    return res.json({ authors: database.author });
+    return res.json({ authors: database.authors });
 });
 
 
@@ -106,7 +112,7 @@ parameter        isbn
 Methods          GET
 */
 booky.get("/author/book/:isbn", (req, res) => {
-    const getspecificAuthor = database.author.filter((author) => 
+    const getspecificAuthor = database.authors.filter((author) => 
     author.books.includes(req.params.isbn)
    );
 
@@ -129,7 +135,7 @@ parameter        NONE
 Methods          GET
 */
 booky.get("/publication", (req, res) => {
-    return res.json({ publications: database.publication })
+    return res.json({ publications: database.publications });
 });
 
 
@@ -140,11 +146,16 @@ Access           PUBLIC
 parameter        NONE
 Methods          POST
 */
-booky.post("/book/add", (req, res) => {
-    console.log(req.body);
-    const { newBook } = req.body.newBook;
-    database.books.push(newBook);
-    return res.json({ books: database.books });
+booky.post("/book/new", async (req, res) => {
+    
+    const {BookSchema} = req.body;
+
+    const addNewBook = new BookModel({newBook});
+    const saveadd = await addNewBook.save()
+
+    // const addNewBook = await BookModel.create(newBook); 
+
+    return res.json({ books: saveadd });
 });
 
 /*
@@ -156,8 +167,8 @@ Methods          POST
 */
 booky.post("/author/add", (req, res) => {
     const { newAuthor } = req.body;
-    database.author.push(newAuthor);
-    return res.json({ authors: database.author });
+    database.authors.push(newAuthor);
+    return res.json({ authors: database.authors });
   });
 
   /*
@@ -316,6 +327,6 @@ booky.delete("/publiations/delete/book/:isbn/:pubId", (req, res) => {
   return res.json({books: database.books,publications: database.publication})
 });
 
-booky.listen(3000, () => console.log("Hy server is running! "));
+booky.listen(9999, () => console.log("Hy server is running! "));
 
 //HTTP Client -> helper who  helps you to to make http request
